@@ -1,0 +1,53 @@
+{
+    :local eth1name "ether1-ISP1"
+    :local etth1ip "192.168.1.100"
+    :local net1name "PLDT"
+
+    :local eth2name "ether2-ISP2"
+    :local etth2ip "192.168.254.100"
+    :local net2name "Globe"
+
+    :local isp1gw "192.168.1.1"
+    :local isp2gw "192.168.254.254"
+
+    :local dst1gw "8.8.4.4"
+    :local dst2gw "1.0.0.1"
+
+    /interface ethernet
+    set [ find default-name=ether1 ] comment=$net1name name=$eth1name
+    set [ find default-name=ether2 ] comment=$net2name name=$eth2name
+
+    /routing table
+    add disabled=no fib name=to_ISP1
+    add disabled=no fib name=to_ISP2
+
+    /interface list
+    add name=WAN_List
+    add name=LAN_List
+
+    /interface list member
+    add interface=$eth1name list=WAN_List
+    add interface=$eth2name list=WAN_List
+
+    /ip firewall address-list
+    add address=192.168.0.0/16 list=RFC1918
+    add address=10.0.0.0/8 list=RFC1918
+    add address=172.16.0.0/12 list=RFC1918
+
+    /ip address
+    add address="$etth1ip/24" interface=$eth1name
+    add address="$etth2ip/24" interface=$eth2name
+
+    /ip route
+    add comment=";;;Monitor ISP1" disabled=no distance=1 dst-address="$dst1gw/32" gateway=$isp1gw routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+    add comment=";;;Monitor ISP2" disabled=no distance=1 dst-address="$dst2gw/32" gateway=$isp2gw pref-src=0.0.0.0 routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+    add check-gateway=ping comment=";;;Ruting ISP1" disabled=no distance=1 dst-address=0.0.0.0/0 gateway=$dst1gw routing-table=to_ISP1 scope=30 suppress-hw-offload=no target-scope=11
+    add check-gateway=ping comment=";;;Routing ISP2" disabled=no distance=1 dst-address=0.0.0.0/0 gateway=$dst2gw routing-table=to_ISP2 scope=30 suppress-hw-offload=no target-scope=11
+    add check-gateway=ping comment=";;;Default ISP1" disabled=no distance=1 dst-address=0.0.0.0/0 gateway=$dst1gw routing-table=main scope=30 suppress-hw-offload=no target-scope=11
+    add check-gateway=ping comment=";;;Default ISP2" disabled=no distance=2 dst-address=0.0.0.0/0 gateway=$dst2gw routing-table=main scope=30 suppress-hw-offload=no target-scope=11
+    add check-gateway=ping comment=";;;Failover ISP1" disabled=no distance=2 dst-address=0.0.0.0/0 gateway=$dst1gw routing-table=to_ISP2 scope=30 suppress-hw-offload=no target-scope=11
+    add check-gateway=ping comment=";;;Failover ISP2" disabled=no distance=2 dst-address=0.0.0.0/0 gateway=$dst2gw routing-table=to_ISP1 scope=30 suppress-hw-offload=no target-scope=11
+
+    /ip firewall nat
+    add action=masquerade chain=srcnat comment=Masquerades out-interface-list=WAN_List src-address-list=RFC1918
+}
