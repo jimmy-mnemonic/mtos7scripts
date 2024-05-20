@@ -1,0 +1,18 @@
+#Blocking Access to Modem
+{
+    :local modem1gw "192.168.1.1"
+    :local modem2gw "192.168.254.254"
+    :local allowaccess "172.16.5.10"
+
+    /ip firewall filter
+    add action=drop chain=forward comment="Blocking Access to Modem" dst-address=$modem1gw src-address="!$allowaccess"
+    add action=drop chain=forward dst-address=$modem2gw src-address="!$allowaccess"
+}
+
+#Avoid tethering
+/ip firewall mangle
+add action=change-ttl chain=prerouting comment="Avoid Tethering" disabled=yes new-ttl=set:1 out-interface=ether1 passthrough=yes
+
+#Hide Source Internet Modem IP
+/ip firewall mangle
+add action=change-ttl chain=prerouting comment="Hide Router and Modem IP's" new-ttl=increment:2 passthrough=ye
