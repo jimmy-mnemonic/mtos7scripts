@@ -9,10 +9,20 @@
     add action=drop chain=forward dst-address=$modem2gw src-address="!$allowaccess"
 }
 
+#Block Outside DNS Request
+/ip firewall filter
+add action=drop chain=input comment="Blocking Outside DNS Request" dst-port=53 in-interface-list=WAN_List protocol=tcp
+add action=drop chain=input dst-port=53 in-interface-list=WAN_List protocol=udp
+
+#Prevent client manually change DNS
+/ip firewall nat
+add action=redirect chain=dstnat comment="Prevent Client Manually Change DNS" dst-port=53 in-interface-list=!WAN_List protocol=tcp to-ports=53
+add action=redirect chain=dstnat dst-port=53 in-interface-list=!WAN_List protocol=udp to-ports=53
+
 #Avoid tethering
 /ip firewall mangle
 add action=change-ttl chain=prerouting comment="Avoid Tethering" disabled=yes new-ttl=set:1 out-interface=ether1 passthrough=yes
 
 #Hide Source Internet Modem IP
 /ip firewall mangle
-add action=change-ttl chain=prerouting comment="Hide Router and Modem IP's" new-ttl=increment:2 passthrough=ye
+add action=change-ttl chain=prerouting comment="Hide Router and Modem IP's" new-ttl=increment:2 passthrough=yes

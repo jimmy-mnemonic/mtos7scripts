@@ -1,17 +1,15 @@
-{
-    /ip firewall address-list
-    add address=172.16.5.100 comment="GLA NAS" list=to_PLDT
-    add address=10.0.8.103 comment=Mnemonic list=to_GLOBE
+/ip firewall address-list
+add address=172.16.5.100 comment="GLA NAS" list=to_PLDT
+add address=10.0.8.103 comment=Mnemonic list=to_GLOBE
 
-    /ip firewall mangle
-    add action=mark-routing chain=prerouting comment="PBR PLDT" new-routing-mark=to_ISP1 passthrough=no src-address-list=to_PLDT
-    add action=mark-routing chain=prerouting comment="PBR GLOBE" new-routing-mark=to_ISP2 passthrough=no src-address-list=to_GLOBE
+/ip firewall mangle
+add action=mark-routing chain=prerouting comment="PBR PLDT" new-routing-mark=to_ISP1 passthrough=no src-address-list=to_PLDT
+add action=mark-routing chain=prerouting comment="PBR GLOBE" new-routing-mark=to_ISP2 passthrough=no src-address-list=to_GLOBE
 
-    /tool netwatch
-    add disabled=no down-script="/ip firewall mangle set new-routing-mark=to_ISP2 numbers\r\
-        \n=[find comment=\"PBR PLDT\"]" host=1.0.0.1 http-codes="" interval=20s test-script="" timeout=10s type=simple up-script="/ip firewall mangle set new-routing-mark=to_ISP1 numbers\r\
-        \n=[find comment=\"PBR PLDT\"]"
-    add disabled=no down-script="/ip firewall mangle set new-routing-mark=to_ISP1 numbers\r\
-        \n=[find comment=\"PBR GLOBE\"]" host=8.8.4.4 http-codes="" interval=20s test-script="" timeout=10s type=simple up-script="/ip firewall mangle set new-routing-mark=to_ISP2 numbers\r\
-        \n=[find comment=\"PBR GLOBE\"]"
-}
+/tool netwatch
+add disabled=no down-script="/ip firewall mangle set new-routing-mark=to_ISP2 numbers\r\
+    \n=[find comment=\"PBR PLDT\"]" host=1.0.0.1 http-codes="" interval=20s test-script="" timeout=10s type=simple up-script="/ip firewall mangle set new-routing-mark=to_ISP1 numbers\r\
+    \n=[find comment=\"PBR PLDT\"]"
+add disabled=no down-script="/ip firewall mangle set new-routing-mark=to_ISP1 numbers\r\
+    \n=[find comment=\"PBR GLOBE\"]" host=8.8.4.4 http-codes="" interval=20s test-script="" timeout=10s type=simple up-script="/ip firewall mangle set new-routing-mark=to_ISP2 numbers\r\
+    \n=[find comment=\"PBR GLOBE\"]"

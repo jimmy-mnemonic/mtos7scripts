@@ -1,7 +1,6 @@
-{
-    /ip firewall mangle
-    add action=mark-connection chain=prerouting comment="Mark connection" new-connection-mark=ISP1_con passthrough=yes per-connection-classifier=both-addresses-and-ports:2/0 src-address-list=RFC1918
-    add action=mark-connection chain=prerouting new-connection-mark=ISP2_con passthrough=yes per-connection-classifier=both-addresses-and-ports:2/1 src-address-list=RFC1918
-    add action=mark-routing chain=prerouting connection-mark=ISP1_con new-routing-mark=to_ISP1 passthrough=yes src-address-list=RFC1918
-    add action=mark-routing chain=prerouting connection-mark=ISP2_con new-routing-mark=to_ISP2 passthrough=yes src-address-list=RFC1918
-}
+
+/ip firewall mangle
+add action=mark-connection chain=prerouting comment="Mark connection" new-connection-mark=ISP1_con passthrough=yes per-connection-classifier=both-addresses-and-ports:2/0 src-address-list=RFC1918
+add action=mark-connection chain=prerouting new-connection-mark=ISP2_con passthrough=yes per-connection-classifier=both-addresses-and-ports:2/1 src-address-list=RFC1918
+add action=mark-routing chain=prerouting connection-mark=ISP1_con new-routing-mark=to_ISP1 passthrough=yes src-address-list=RFC1918
+add action=mark-routing chain=prerouting connection-mark=ISP2_con new-routing-mark=to_ISP2 passthrough=yes src-address-list=RFC1918
