@@ -50,4 +50,9 @@
 
     /ip firewall nat
     add action=masquerade chain=srcnat comment=Masquerades out-interface-list=WAN_List src-address-list=RFC1918
+
+    /ip firewall mangle
+    add action=accept chain=prerouting dst-address-list=RFC1918 src-address-list=RFC1918
+    add action=mark-connection chain=prerouting connection-mark=no-mark in-interface=$eth1name new-connection-mark=ISP1_con passthrough=yes
+    add action=mark-connection chain=prerouting connection-mark=no-mark in-interface=$eth2name new-connection-mark=ISP2_con passthrough=yes
 }
