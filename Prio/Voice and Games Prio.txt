@@ -1,0 +1,12 @@
+/ip firewall mangle
+add action=mark-packet chain=prerouting dst-port=443,88,3074,3075,3478-3480 new-packet-mark=game-priority protocol=tcp
+add action=mark-packet chain=prerouting dst-port=5060,5061,10000-20000 new-packet-mark=voice-priority protocol=tcp
+add action=mark-packet chain=prerouting dst-port=443,88,3074,3075,3478-3480 new-packet-mark=game-priority protocol=udp
+add action=mark-packet chain=prerouting dst-port=5060,5061,10000-20000 new-packet-mark=voice-priority protocol=udp
+
+/queue tree
+add max-limit=100M name=global-queue parent=global
+add max-limit=100M name=lan-root parent=global-queue queue=default
+add max-limit=20M name=voice-queue packet-mark=voice-priority parent=lan-root priority=2 queue=fq-codel
+add max-limit=50M name=game-queue packet-mark=game-priority parent=lan-root priority=1 queue=fq-codel
+add max-limit=80M name=other-queue parent=lan-root priority=7 queue=default
