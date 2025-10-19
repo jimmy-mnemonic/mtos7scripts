@@ -1,0 +1,9 @@
+/tool netwatch
+add comment="Check if ISP1 is Online" disabled=no down-script="[/ip firewall mangle set new-routing-mark=\"to_ISP2\" numbers=[find comment=\"PBR ISP1\"]];\
+    \n[:log info \"ISP1 is DOWN!\"];" host=8.8.4.4 http-codes="" interval=30s test-script="" timeout=10s type=simple up-script=\
+    "[/ip firewall mangle set new-routing-mark=\"to_ISP1\" numbers=[find comment=\"PBR ISP1\"]];\
+    \n[:log info \"ISP1 is UP!\"];"
+add comment="Check if ISP2 is Online" disabled=no down-script="[/ip firewall mangle set new-routing-mark=\"to_ISP1\" numbers=[find comment=\"PBR ISP2\"]];\
+    \n[:log info \"ISP2 is DOWN!\"];" host=192.0.43.10 http-codes="" interval=30s test-script="" timeout=10s type=simple up-script=\
+    "[/ip firewall mangle set new-routing-mark=\"to_ISP2\" numbers=[find comment=\"PBR ISP2\"]];\
+    \n[:log info \"ISP2 is UP!\"];"
