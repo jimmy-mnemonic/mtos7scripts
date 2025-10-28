@@ -1,0 +1,22 @@
+/ip firewall mangle
+add action=mark-connection chain=prerouting comment=ICMP new-connection-mark=ICMP_Conn protocol=icmp
+add action=mark-packet chain=prerouting connection-mark=ICMP_Conn in-interface-list=LAN_List new-packet-mark=ICMP_up passthrough=no
+add action=mark-packet chain=prerouting connection-mark=ICMP_Conn in-interface-list=WAN_List new-packet-mark=ICMP_down passthrough=no
+add action=mark-connection chain=prerouting comment=DNS dst-port=53 new-connection-mark=DNS_Conn protocol=tcp
+add action=mark-connection chain=prerouting dst-port=53 new-connection-mark=DNS_Conn protocol=udp
+add action=mark-packet chain=prerouting connection-mark=DNS_Conn in-interface-list=LAN_List new-packet-mark=DNS_up passthrough=no
+add action=mark-packet chain=prerouting connection-mark=DNS_Conn in-interface-list=WAN_List new-packet-mark=DNS_down passthrough=no
+add action=mark-connection chain=prerouting comment="Web(HTTP)" dst-port=80,443 new-connection-mark=Web_Conn protocol=tcp
+add action=mark-connection chain=prerouting dst-port=80,443 new-connection-mark=Web_Conn protocol=udp
+add action=mark-packet chain=prerouting connection-mark=Web_Conn in-interface-list=LAN_List new-packet-mark=Web_up passthrough=no
+add action=mark-packet chain=prerouting connection-mark=Web_Conn in-interface-list=WAN_List new-packet-mark=Web_down passthrough=no
+
+/queue tree
+add limit-at=1024M max-limit=1024M name=Down_total parent=global priority=1 queue=pcq-download-default
+add limit-at=1024M max-limit=1024M name=Upload_total parent=global priority=1 queue=pcq-upload-default
+add max-limit=1024M name=ICMP_down packet-mark=ICMP_down parent=Down_total priority=1 queue=default
+add max-limit=1024M name=ICMP_up packet-mark=ICMP_up parent=Upload_total priority=1 queue=default
+add max-limit=1024M name=DNS_down packet-mark=DNS_down parent=Down_total priority=2 queue=default
+add max-limit=1024M name=DNS_up packet-mark=DNS_up parent=Upload_total priority=1 queue=default
+add max-limit=1024M name=Web_up packet-mark=Web_up parent=Upload_total priority=4 queue=default
+add max-limit=1024M name=Web_down packet-mark=Web_down parent=Down_total priority=4 queue=default
