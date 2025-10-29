@@ -1,0 +1,4 @@
+/ip firewall filter
+add action=accept chain=input comment="Valid Traffic" connection-state=established,related,new
+add action=accept chain=forward connection-state=established,related,new
+add action=drop chain=input connection-state=invalid
